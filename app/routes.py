@@ -12,7 +12,7 @@ import os
 def index():
     form = IndexForm()
 
-    if form.login.is_submitted() and form.login.submit.data:
+    if form.login.is_submitted() and form.login.submit.data and form.login.validate_on_submit():
         user = query_db('SELECT * FROM Users WHERE username=?',
                         form.login.username.data, one=True)
         if user == None:
@@ -22,7 +22,8 @@ def index():
         else:
             flash('Sorry, wrong username or password!')
 
-    elif form.register.is_submitted() and form.register.submit.data:
+    elif form.register.is_submitted() and form.register.submit.data and form.register.validate_on_submit():
+        flash('Congratulations, {} registered!'.format(form.register.username.data))
         query_db('INSERT INTO Users (username, first_name, last_name, password) VALUES(?, ?, ?, ?)', form.register.username.data, form.register.first_name.data,
                  form.register.last_name.data, form.register.password.data)
         return redirect(url_for('index'))
