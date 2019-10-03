@@ -3,6 +3,7 @@ from config import Config
 from flask_bootstrap import Bootstrap
 #from flask_login import LoginManager
 from bs4 import BeautifulSoup
+import hashlib
 import sqlite3
 import os
 
@@ -13,6 +14,11 @@ app.config.from_object(Config)
 
 # TODO: Handle login management better, maybe with flask_login?
 #login = LoginManager(app)
+
+#Hash the password using SHA256 and a salt
+def hash_password(user_password):
+    SALT = '6385c57a230996dcbf7ba2bcb68b0b00'
+    return hashlib.sha256(user_password.encode()+SALT).hexdigest()
 
 # get an instance of the db
 def get_db():
