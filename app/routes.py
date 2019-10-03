@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, session
-from flask_login import LoginManager, login_user, login_required, current_user
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from app import app, query_db, get_db
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
 from datetime import datetime
@@ -18,8 +18,8 @@ def index():
         if user == None:
             flash('Sorry, wrong username or password!')
         elif user['password'] == form.login.password.data:
-            login_user(user, remember=True)
-            return redirect(url_for('stream', username=form.login.username.data))
+            login_user(user, remember=form.login.remember_me.data)
+            return redirect(url_for('stream', username=current_user.username))
         else:
             flash('Sorry, wrong username or password!')
 
@@ -98,3 +98,9 @@ def profile(username):
     user = query_db('SELECT * FROM Users WHERE username=?',
                     username, one=True)
     return render_template('profile.html', title='profile', username=username, user=user, form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))

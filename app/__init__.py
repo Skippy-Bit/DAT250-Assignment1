@@ -14,11 +14,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 Bootstrap(app)
-
-@login_manager.user_loader
-def load_user(user_id):
-    return query_db('SELECT * FROM Users WHERE username=?',
-                    user_id, one=True)
                     
 # get an instance of the db
 def get_db():
@@ -46,7 +41,11 @@ def query_db(query, *args, **kwargs):
     db.commit()
     return (rv[0] if rv else None) if one else rv
 
+from .models import User
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 # TODO: Add more specific queries to simplify code
 

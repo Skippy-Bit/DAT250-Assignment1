@@ -1,9 +1,9 @@
 
 # models.py
 from flask_login import UserMixin
-from app import get_db
+from . import db
 
-class User(UserMixin, get_db):
-    id = get_db.Column(get_db.Integer, primary_key=True)
-    username = get_db.Column(get_db.string(100), unique=True)
-    password = get_db.Column(get_db.string(100))
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.string(100), unique=True)
+    password = db.Column(db.string(100))
