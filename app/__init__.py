@@ -2,6 +2,7 @@ from flask import Flask, g
 from config import Config
 from flask_bootstrap import Bootstrap
 #from flask_login import LoginManager
+from bs4 import BeautifulSoup
 import sqlite3
 import os
 
@@ -40,6 +41,14 @@ def query_db(query, *args, **kwargs):
     return (rv[0] if rv else None) if one else rv
 
 # TODO: Add more specific queries to simplify code
+
+
+# Sanitize string, removes html
+
+def sanitizeStr(value, strip = True):
+    soup = BeautifulSoup(value,features="html.parser")
+    text = soup.get_text(' ',strip=strip)
+    return text
 
 # automatically called when application is closed, and closes db connection
 @app.teardown_appcontext

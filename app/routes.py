@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request
-from app import app, query_db
+from app import app, query_db, sanitizeStr
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
 from datetime import datetime
 import os
@@ -11,21 +11,27 @@ import os
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     form = IndexForm()
-
     if form.login.is_submitted() and form.login.submit.data and form.login.validate_on_submit():
-        user = query_db('SELECT * FROM Users WHERE username=?',
-                        form.login.username.data, one=True)
-        if user == None:
-            flash('Sorry, wrong username or password!')
-        elif user['password'] == form.login.password.data:
-            return redirect(url_for('stream', username=form.login.username.data))
-        else:
-            flash('Sorry, wrong username or password!')
+        username = sanitizeStr(form.login.username.data,False)
+        password = sanitizeStr(form.login.password.data,False)
+        try:
+            user = query_db('SELECT * FROM Users WHERE username=?', username, one=True)
+
+            if user != None and user['password'] == password:
+                    return redirect(url_for('stream', username=username))
+            else:
+                flash('Sorry, wrong username or password!')
+        except Exception as e:
+            flash('An error has occured, please contact the admin\nError was: {}'.format(e),'error')
 
     elif form.register.is_submitted() and form.register.submit.data and form.register.validate_on_submit():
-        flash('Congratulations, {} registered!'.format(form.register.username.data))
-        query_db('INSERT INTO Users (username, first_name, last_name, password) VALUES(?, ?, ?, ?)', form.register.username.data, form.register.first_name.data,
-                 form.register.last_name.data, form.register.password.data)
+        username = sanitizeStr(form.register.username.data)
+        firstname = sanitizeStr(form.register.first_name.data)
+        lastname = sanitizeStr(form.register.last_name.data)
+        password = sanitizeStr(form.register.password.data)
+        flash('Congratulations, {} registered!'.format(sanitizeStr(form.register.username.data)))
+        query_db('INSERT INTO Users (username, first_name, last_name, password) VALUES(?, ?, ?, ?)', username, firstname,
+                 lastname, password)
         return redirect(url_for('index'))
     return render_template('index.html', title='Welcome', form=form)
 
@@ -34,16 +40,15 @@ def index():
 @app.route('/stream/<username>', methods=['GET', 'POST'])
 def stream(username):
     form = PostForm()
-    user = query_db('SELECT * FROM Users WHERE username=?',
-                    username, one=True)
+    user = query_db('SELECT * FROM Users WHERE username=?', username, one=True)
     if form.is_submitted():
+        content = sanitizeStr(form.content.data, strip=False)
         if form.image.data:
-            path = os.path.join(
-                app.config['UPLOAD_PATH'], form.image.data.filename)
+            path = os.path.join(app.config['UPLOAD_PATH'], form.image.data.filename)
             form.image.data.save(path)
 
         query_db('INSERT INTO Posts (u_id, content, image, creation_time) VALUES(?, ?, ?, ?)',
-                 user['id'], form.content.data, form.image.data.filename, datetime.now())
+                 user['id'], content, form.image.data.filename, datetime.now())
         return redirect(url_for('stream', username=username))
 
     posts = query_db('SELECT p.*, u.*, (SELECT COUNT(*) FROM Comments WHERE p_id=p.id) AS cc FROM Posts AS p JOIN Users AS u ON u.id=p.u_id WHERE p.u_id IN (SELECT u_id FROM Friends WHERE f_id=?) OR p.u_id IN (SELECT f_id FROM Friends WHERE u_id=?) OR p.u_id=? ORDER BY p.creation_time DESC',
@@ -89,8 +94,15 @@ def friends(username):
 def profile(username):
     form = ProfileForm()
     if form.is_submitted():
+        education = sanitizeStr(form.education.data)
+        employment = sanitizeStr(form.employment.data)
+        music = sanitizeStr(form.movie.data)
+        movie = sanitizeStr(form.movie.data)
+        nationality = sanitizeStr(form.nationality.data)
+        birthday = form.birthday.data
+
         query_db('UPDATE Users SET education=?, employment=?, music=?, movie=?, nationality=?, birthday=? WHERE username=?',
-                 form.education.data, form.employment.data, form.music.data, form.movie.data, form.nationality.data, form.birthday.data, username)
+                 education, employment, music, movie, nationality, birthday, username)
         return redirect(url_for('profile', username=username))
 
     user = query_db('SELECT * FROM Users WHERE username=?',
