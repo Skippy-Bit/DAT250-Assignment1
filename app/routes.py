@@ -1,5 +1,6 @@
-from flask import render_template, flash, redirect, url_for, request
-from app import app, query_db
+from flask import render_template, flash, redirect, url_for, request, session
+from flask_login import LoginManager, login_user, login_required, current_user
+from app import app, query_db, get_db
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
 from datetime import datetime
 import os
@@ -11,13 +12,13 @@ import os
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     form = IndexForm()
-
     if form.login.is_submitted() and form.login.submit.data and form.login.validate_on_submit():
         user = query_db('SELECT * FROM Users WHERE username=?',
                         form.login.username.data, one=True)
         if user == None:
             flash('Sorry, wrong username or password!')
         elif user['password'] == form.login.password.data:
+            login_user(user, remember=True)
             return redirect(url_for('stream', username=form.login.username.data))
         else:
             flash('Sorry, wrong username or password!')
@@ -28,6 +29,7 @@ def index():
                  form.register.last_name.data, form.register.password.data)
         return redirect(url_for('index'))
     return render_template('index.html', title='Welcome', form=form)
+
 
 
 # content stream page
@@ -88,7 +90,7 @@ def friends(username):
 @app.route('/profile/<username>', methods=['GET', 'POST'])
 def profile(username):
     form = ProfileForm()
-    if form.is_submitted():
+    if form.validate_on_submit():
         query_db('UPDATE Users SET education=?, employment=?, music=?, movie=?, nationality=?, birthday=? WHERE username=?',
                  form.education.data, form.employment.data, form.music.data, form.movie.data, form.nationality.data, form.birthday.data, username)
         return redirect(url_for('profile', username=username))

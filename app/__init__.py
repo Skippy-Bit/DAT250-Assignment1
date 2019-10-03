@@ -1,18 +1,25 @@
 from flask import Flask, g
 from config import Config
 from flask_bootstrap import Bootstrap
-#from flask_login import LoginManager
+from flask_login import LoginManager
 import sqlite3
 import os
 
 # create and configure app
 app = Flask(__name__)
-Bootstrap(app)
 app.config.from_object(Config)
-
+app.config['WTF_CSRF_ENABLED'] = True
 # TODO: Handle login management better, maybe with flask_login?
-#login = LoginManager(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
 
+Bootstrap(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return query_db('SELECT * FROM Users WHERE username=?',
+                    user_id, one=True)
+                    
 # get an instance of the db
 def get_db():
     db = getattr(g, '_database', None)
@@ -39,6 +46,8 @@ def query_db(query, *args, **kwargs):
     db.commit()
     return (rv[0] if rv else None) if one else rv
 
+
+
 # TODO: Add more specific queries to simplify code
 
 # automatically called when application is closed, and closes db connection
@@ -54,5 +63,6 @@ if not os.path.exists(app.config['DATABASE']):
 
 if not os.path.exists(app.config['UPLOAD_PATH']):
     os.mkdir(app.config['UPLOAD_PATH'])
+
 
 from app import routes
