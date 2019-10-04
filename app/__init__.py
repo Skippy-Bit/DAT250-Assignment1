@@ -1,7 +1,8 @@
 from flask import Flask, g
+import json
 from config import Config
 from flask_bootstrap import Bootstrap
-from flask_login import LoginManager
+from flask_login import LoginManager, UserMixin
 import sqlite3
 import os
 
@@ -12,9 +13,10 @@ app.config['WTF_CSRF_ENABLED'] = True
 # TODO: Handle login management better, maybe with flask_login?
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view =('/index')
 
 Bootstrap(app)
-                    
+
 # get an instance of the db
 def get_db():
     db = getattr(g, '_database', None)
@@ -41,11 +43,33 @@ def query_db(query, *args, **kwargs):
     db.commit()
     return (rv[0] if rv else None) if one else rv
 
-from .models import User
+def get_cursor():
+    with app.app_context():
+        cur = get_db().cursor()
+        cur.execute('SELECT * FROM Users WHERE id=2')
+        r = cur.fetchone()
+        return r
+
+class User(UserMixin):
+    def __init__(self , username , password , id , active=True):
+        self.id = id
+        self.username = username
+        self.password = password
+        self.active = active
+
+    def get_id(self):
+        object_id = self.id
+        return str(object_id)
+
+    def is_active(self):
+        return self.active
+
+    def get_auth_token(self):
+        return make_secure_token(self.username , key='secret_key')
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User
 
 # TODO: Add more specific queries to simplify code
 

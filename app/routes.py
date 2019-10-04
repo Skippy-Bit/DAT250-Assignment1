@@ -1,6 +1,6 @@
-from flask import render_template, flash, redirect, url_for, request, session
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from app import app, query_db, get_db
+from flask import render_template, flash, redirect, url_for, request, session, jsonify
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
+from app import app, query_db, get_db, User, get_cursor
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
 from datetime import datetime
 import os
@@ -18,8 +18,11 @@ def index():
         if user == None:
             flash('Sorry, wrong username or password!')
         elif user['password'] == form.login.password.data:
-            login_user(user, remember=form.login.remember_me.data)
-            return redirect(url_for('stream', username=current_user.username))
+            cur = get_cursor()
+            user2 = User(cur['username'], cur['password'], cur['id'])
+            login_user(user2, remember=form.login.remember_me.data)
+            print(current_user)
+            return redirect(url_for('stream', username=form.login.username.data))
         else:
             flash('Sorry, wrong username or password!')
 
@@ -34,6 +37,7 @@ def index():
 
 # content stream page
 @app.route('/stream/<username>', methods=['GET', 'POST'])
+@login_required
 def stream(username):
     form = PostForm()
     user = query_db('SELECT * FROM Users WHERE username=?',
@@ -54,6 +58,7 @@ def stream(username):
 
 # comment page for a given post and user.
 @app.route('/comments/<username>/<int:p_id>', methods=['GET', 'POST'])
+@login_required
 def comments(username, p_id):
     form = CommentsForm()
     if form.is_submitted():
@@ -69,6 +74,7 @@ def comments(username, p_id):
 
 # page for seeing and adding friends
 @app.route('/friends/<username>', methods=['GET', 'POST'])
+@login_required
 def friends(username):
     form = FriendsForm()
     user = query_db('SELECT * FROM Users WHERE username=?',
@@ -88,6 +94,7 @@ def friends(username):
 
 # see and edit detailed profile information of a user
 @app.route('/profile/<username>', methods=['GET', 'POST'])
+@login_required
 def profile(username):
     form = ProfileForm()
     if form.validate_on_submit():
@@ -98,6 +105,7 @@ def profile(username):
     user = query_db('SELECT * FROM Users WHERE username=?',
                     username, one=True)
     return render_template('profile.html', title='profile', username=username, user=user, form=form)
+
 
 @app.route('/logout')
 @login_required
