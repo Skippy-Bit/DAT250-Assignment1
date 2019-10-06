@@ -27,7 +27,7 @@ def hash_password(user_password):
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect(app.config['DATABASE'])
+        db = g._database = sqlite3.connect(app.config['DATABASE'], timeout=5000)
     db.row_factory = sqlite3.Row
     return db
 
@@ -99,4 +99,4 @@ if not os.path.exists(app.config['DATABASE']):
 if not os.path.exists(app.config['UPLOAD_PATH']):
     os.mkdir(app.config['UPLOAD_PATH'])
 
-from app import routes
+from app import routes, errors

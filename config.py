@@ -8,5 +8,5 @@ class Config(object):
     UPLOAD_PATH = 'app/static/uploads'
     WTF_CSRF_ENABLED = True
     SESSION_PERMANENT=False
-    ALLOWED_EXTENSIONS = {} # Might use this at some point, probably don't want people to upload any file type
+    ALLOWED_EXTENSIONS = {'png'} # Might use this at some point, probably don't want people to upload any file type
     REMEMBER_COOKIE_HTTPONLY = True
