@@ -1,4 +1,4 @@
-from flask import Flask, g
+from flask import Flask, g, session
 import json
 from config import Config
 from flask_bootstrap import Bootstrap
@@ -43,10 +43,10 @@ def query_db(query, *args, **kwargs):
     db.commit()
     return (rv[0] if rv else None) if one else rv
 
-def get_cursor():
+def get_cursor(user_id):
     with app.app_context():
         cur = get_db().cursor()
-        cur.execute('SELECT * FROM Users WHERE id=2')
+        cur.execute('SELECT * FROM Users WHERE id=%s' % (user_id))
         r = cur.fetchone()
         return r
 
@@ -69,7 +69,18 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User
+    try:
+        with app.app_context():
+            cur = get_db().cursor()
+            cur.execute('SELECT * FROM Users WHERE id=%s' % (user_id))
+            r = cur.fetchone()
+            return User(r['username'], r['password'], r['id'])
+    except:
+        return None
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = False
 
 # TODO: Add more specific queries to simplify code
 

@@ -19,7 +19,7 @@
         </nav>
         {% else %}
         <nav class="navbar navbar-dark bg-primary navbar-expand-lg fixed-top">
-            <a class="navbar-brand" href={{url_for('stream', username=username)}}>Social Insecurity</a>
+            <a class="navbar-brand" href={{url_for('stream', username=current_user.username)}}>Social Insecurity</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggle" aria-controls="navbar-toggle" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -27,27 +27,27 @@
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
                     {% if title == 'Stream' or title == 'Comments' %}
-                    <a class="nav-link active" href={{ url_for('stream', username=username) }}>Stream <span class="sr-only">(current)</span></a>
+                    <a class="nav-link active" href={{ url_for('stream', username=current_user.username) }}>Stream <span class="sr-only">(current)</span></a>
                     {% else %}
-                    <a class="nav-link" href={{ url_for('stream', username=username) }}>Stream</a>
+                    <a class="nav-link" href={{ url_for('stream', username=current_user.username) }}>Stream</a>
                     {% endif %}
                 </li>
                 <li class="nav-item">
                     {% if title == 'Friends' %}
-                    <a class="nav-link active" href={{ url_for('friends', username=username) }}>Friends <span class="sr-only">(current)</span></a>
+                    <a class="nav-link active" href={{ url_for('friends', username=current_user.username) }}>Friends <span class="sr-only">(current)</span></a>
                     {% else %}
-                    <a class="nav-link" href={{ url_for('friends', username=username) }}>Friends</a>
+                    <a class="nav-link" href={{ url_for('friends', username=current_user.username) }}>Friends</a>
                     {% endif %}
                 </li>
                 <li class="nav-item">
                     {% if title == 'Profile' %}
-                    <a class="nav-link" href={{ url_for('profile', username=username) }}>Profile <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href={{ url_for('profile', username=current_user.username) }}>Profile <span class="sr-only">(current)</span></a>
                     {% else %}
-                    <a class="nav-link" href={{ url_for('profile', username=username) }}>Profile</a>
+                    <a class="nav-link" href={{ url_for('profile', username=current_user.username) }}>Profile</a>
                     {% endif %}
                 </li>
             </ul>
-            <a class="btn btn-outline-dark" href={{url_for('index')}} role="button">Log Out</a>
+            <a class="btn btn-outline-dark" href={{url_for('logout')}} role="button">Log Out</a>        
             </div>
         </nav>
         {% endif %}

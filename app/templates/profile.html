@@ -7,7 +7,9 @@
             <div class="card">
                 <div class="card-body">
                     <h1 class="card-text">About {{username}}</h1>
+                    {% if current_user.username==username %}
                       <button type="button" class="btn btn-link" id="edit-button"><span class="fa fa-edit"></span>&nbsp;Edit</button>
+                    {% endif %}
                     <!--View details-->
                     <div id="view-details">
                         <ul class="list-group list-group-flush">
@@ -60,7 +62,6 @@
                     <div id="edit-details" style="display: none;">
                         <form action="" method="POST" >
                             {{ form.hidden_tag() }}
-                            {{ form.csrf_token}}
                             {{ wtf.form_field(form.education) }}
                             {{ wtf.form_field(form.employment) }}
                             {{ wtf.form_field(form.music) }}
