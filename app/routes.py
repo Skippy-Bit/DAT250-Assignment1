@@ -1,6 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request
-from app import app, query_db, sanitizeStr, hash_password, User, photos
+from app import app, query_db, User, photos
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
+from app.utils import sanitizeStr, hash_password
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from datetime import datetime
 import os
