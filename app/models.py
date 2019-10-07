@@ -1,3 +1,4 @@
+from flask_login import UserMixin
 # File containing all database models
 class User(UserMixin):
     def __init__(self , username , password , id , active=True, authenticated=True):

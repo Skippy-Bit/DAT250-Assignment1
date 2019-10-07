@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, request
 from app import app, query_db, User, photos, limiter
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
 from app.utils import sanitizeStr, hash_password
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import datetime
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
