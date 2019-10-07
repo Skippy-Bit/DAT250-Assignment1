@@ -12,4 +12,4 @@ wincertstore==0.2
 WTForms==2.2.1
 beautifulsoup4==4.8.0
 flask_uploads==0.2.1
-flask_limiter==1.0.1
+flask_limiter==1.1.1
