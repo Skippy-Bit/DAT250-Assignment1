@@ -8,6 +8,7 @@
                 <div class="card-body">
                     <h1>Share something</h1>
                     <form action="" method="POST" novalidate enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
                         {{ wtf.form_field(form.content) }}
                         {{ wtf.form_field(form.image) }}
                         {{ wtf.form_field(form.submit, class="btn btn-primary") }}

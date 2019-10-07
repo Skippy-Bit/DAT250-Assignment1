@@ -2,6 +2,7 @@ from flask import Flask, g
 from config import Config
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, UserMixin
+from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from bs4 import BeautifulSoup
 import hashlib
 import sqlite3
@@ -17,6 +18,10 @@ login_manager.refresh_view=('/index')
 login_manager.session_protection = "strong"
 
 Bootstrap(app)
+
+photos = UploadSet('photos', IMAGES)
+configure_uploads(app, photos)
+patch_request_class(app)  # set maximum file size, default is 16MB
 
 #Hash the password using SHA256 and a salt
 def hash_password(user_password):
@@ -70,7 +75,6 @@ class User(UserMixin):
         return self.active
 
 # Sanitize string, removes html
-
 def sanitizeStr(value, strip = True):
     soup = BeautifulSoup(value,features="html.parser")
     text = soup.get_text(' ',strip=strip)
@@ -96,7 +100,7 @@ def load_user(user_id):
 if not os.path.exists(app.config['DATABASE']):
     init_db()
 
-if not os.path.exists(app.config['UPLOAD_PATH']):
-    os.mkdir(app.config['UPLOAD_PATH'])
+if not os.path.exists(app.config['UPLOADED_PHOTOS_DEST']):
+    os.mkdir(app.config['UPLOADED_PHOTOS_DEST'])
 
 from app import routes, errors
