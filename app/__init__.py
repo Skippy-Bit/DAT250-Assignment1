@@ -3,8 +3,7 @@ from config import Config
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, UserMixin
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
-from bs4 import BeautifulSoup
-import hashlib
+from app.models import User
 import sqlite3
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -27,10 +26,6 @@ photos = UploadSet('photos', IMAGES)
 configure_uploads(app, photos)
 patch_request_class(app)  # set maximum file size, default is 16MB
 
-#Hash the password using SHA256 and a salt
-def hash_password(user_password):
-    SALT = '6385c57a230996dcbf7ba2bcb68b0b00'
-    return hashlib.sha256(user_password.encode()+SALT.encode()).hexdigest()
 
 # get an instance of the db
 def get_db():
@@ -57,32 +52,6 @@ def query_db(query, *args, **kwargs):
     cursor.close()
     db.commit()
     return (rv[0] if rv else None) if one else rv
-
-# TODO: Add more specific queries to simplify code
-
-class User(UserMixin):
-    def __init__(self , username , password , id , active=True, authenticated=True):
-        self.id = id
-        self.username = username
-        self.password = password
-        self.active = active
-        self.authenticated = authenticated
-
-    def get_id(self):
-        object_id = self.id
-        return str(object_id)
-
-    def is_authenticated(self):
-        return self.authenticated
-
-    def is_active(self):
-        return self.active
-
-# Sanitize string, removes html
-def sanitizeStr(value, strip = True):
-    soup = BeautifulSoup(value,features="html.parser")
-    text = soup.get_text(' ',strip=strip)
-    return text
 
 # automatically called when application is closed, and closes db connection
 @app.teardown_appcontext

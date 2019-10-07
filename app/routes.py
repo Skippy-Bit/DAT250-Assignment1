@@ -1,6 +1,7 @@
-from flask import Flask, render_template, flash, redirect, url_for, request
-from app import app, query_db, sanitizeStr, hash_password, User, photos, limiter
+from flask import render_template, flash, redirect, url_for, request
+from app import app, query_db, User, photos, limiter
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
+from app.utils import sanitizeStr, hash_password
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from datetime import datetime
 from flask_limiter import Limiter
@@ -86,14 +87,15 @@ def comments(username, p_id):
     else:
         form = CommentsForm()
         if form.is_submitted():
+            comment = sanitizeStr(form.comment.data)
             # Dont post anything if form is empty
-            if form.comment.data == '':
+            if comment == '':
                 return redirect(url_for('comments', username=current_user.username, p_id=p_id))
 
             user = query_db('SELECT * FROM Users WHERE username=?',
                             username, one=True)
             query_db('INSERT INTO Comments (p_id, u_id, comment, creation_time) VALUES(?, ?, ?, ?)',
-                     p_id, user['id'], form.comment.data, datetime.now())
+                     p_id, user['id'], comment, datetime.now())
             return redirect(url_for('comments', username=current_user.username, p_id=p_id)) # this clears the form after successfull post.
 
         post = query_db('SELECT * FROM Posts WHERE id=?', p_id, one=True)
@@ -112,8 +114,9 @@ def friends(username):
         user = query_db('SELECT * FROM Users WHERE username=?',
                         username, one=True)
         if form.is_submitted():
+            userSearch = sanitizeStr(form.username.data)
             friend = query_db(
-                'SELECT * FROM Users WHERE username=?', form.username.data, one=True)
+                'SELECT * FROM Users WHERE username=?', userSearch, one=True)
             if friend is None:
                 flash('User does not exist')
             else:
