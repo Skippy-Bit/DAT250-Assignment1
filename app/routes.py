@@ -14,7 +14,7 @@ import os
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
-@limiter.limit("50/minute", "10/seconds")
+@limiter.limit("50/minute;10/seconds")
 def index():
     form = IndexForm()
 
