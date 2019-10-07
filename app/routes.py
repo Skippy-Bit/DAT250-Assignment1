@@ -1,15 +1,19 @@
-from flask import render_template, flash, redirect, url_for, request
-from app import app, query_db, sanitizeStr, hash_password, User, photos
+from flask import Flask, render_template, flash, redirect, url_for, request
+from app import app, query_db, sanitizeStr, hash_password, User, photos, limiter
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from datetime import datetime
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 
 # this file contains all the different routes, and the logic for communicating with the database
 
 # home page/login/registration
+
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
+@limiter.limit("50/minute", "10/seconds")
 def index():
     form = IndexForm()
 
@@ -151,3 +155,7 @@ def logout():
 @app.errorhandler(404)
 def page_not_found(e):
     return redirect(url_for('stream', username=current_user.username))
+
+
+
+

@@ -6,6 +6,8 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_cl
 from bs4 import BeautifulSoup
 import hashlib
 import sqlite3
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 
 # create and configure app
@@ -16,6 +18,8 @@ login_manager.init_app(app)
 login_manager.login_view =('/index')
 login_manager.refresh_view=('/index')
 login_manager.session_protection = "strong"
+
+limiter = Limiter(app, key_func=get_remote_address, default_limits=["20000/day", "500/hour"]) # set the maximum amout of tries before user get locked out for a time
 
 Bootstrap(app)
 
