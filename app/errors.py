@@ -5,7 +5,10 @@ from app import app
 
 @app.errorhandler(500)
 def internal_error(error):
-    return render_template('500.html', title='Welcome'), 500
+    if hasattr(current_user, 'username'):
+        return render_template('500.html'), 500
+    else:
+        return render_template('500.html', title='Welcome'), 500
 
 @app.errorhandler(413)
 def request_entity_too_large(error):
