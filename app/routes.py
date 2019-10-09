@@ -1,12 +1,10 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for
 from app import app, query_db, User, photos, limiter
 from app.forms import IndexForm, PostForm, FriendsForm, ProfileForm, CommentsForm
 from app.utils import sanitizeStr, hash_password
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-import os
+
 
 # this file contains all the different routes, and the logic for communicating with the database
 
@@ -19,8 +17,6 @@ def index():
     form = IndexForm()
 
     if form.login.is_submitted() and form.login.submit.data and form.login.validate_on_submit():
-        username = sanitizeStr(form.login.username.data)
-        password = sanitizeStr(form.login.password.data)
         try:
             user = query_db('SELECT * FROM Users WHERE username=?',
                             form.login.username.data, one=True)
@@ -142,7 +138,7 @@ def profile(username):
 
         query_db('UPDATE Users SET education=?, employment=?, music=?, movie=?, nationality=?, birthday=? WHERE username=?',
                  education, employment, music, movie, nationality, birthday, username)
-        return redirect(url_for('profile', username=username))
+        return redirect(url_for('profile', username=current_user.username))
 
     user = query_db('SELECT * FROM Users WHERE username=?',
                     username, one=True)
@@ -155,9 +151,6 @@ def logout():
     flash('You have sucessfully logged out')
     return redirect(url_for('index'))
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return redirect(url_for('stream', username=current_user.username))
 
 
 

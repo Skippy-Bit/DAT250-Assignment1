@@ -1,7 +1,7 @@
 from flask import Flask, g
 from config import Config
 from flask_bootstrap import Bootstrap
-from flask_login import LoginManager, UserMixin
+from flask_login import LoginManager
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from app.models import User
 import sqlite3
@@ -12,16 +12,17 @@ import os
 # create and configure app
 app = Flask(__name__)
 app.config.from_object(Config)
+# flask_login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view =('/index')
 login_manager.refresh_view=('/index')
 login_manager.session_protection = "strong"
-
+# flask_limiter
 limiter = Limiter(app, key_func=get_remote_address, default_limits=["20000/day", "500/hour"]) # set the maximum amout of tries before user get locked out for a time
-
+# flask_bootstrap
 Bootstrap(app)
-
+# flask_uploads
 photos = UploadSet('photos', IMAGES)
 configure_uploads(app, photos)
 patch_request_class(app)  # set maximum file size, default is 16MB
